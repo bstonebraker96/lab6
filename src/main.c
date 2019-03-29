@@ -13,6 +13,10 @@
 #include "stm32l4xx_hal.h"
 #include "stm32l475e_iot01.h"
 #include "string.h"
+
+static uint32_t USARTCount = 0;
+
+
 int main(void)
 {
 	HAL_Init();
@@ -21,7 +25,6 @@ int main(void)
 	/* Configure UART4 */
 	Configure_USART();
 	char* startText= "\n{\"Action\":\"Debug\",\"Info\":\"Testing UART4\"}\n";
-	SendCharArrayUSART4(startText,strlen(startText));
 	uint32_t currentTicks = HAL_GetTick();
 	uint32_t LEDTimer = currentTicks;
 	uint8_t strcount = 0;
@@ -32,8 +35,6 @@ int main(void)
 		currentTicks = HAL_GetTick();
 
 		if (haveString){
-			SendCharArrayUSART4(receivedString,strlen(receivedString));
-			SendCharArrayUSART4("\n",strlen("\n"));
 			haveString = 0;
 			strcount = 2*strlen(receivedString)+1;
 
@@ -117,14 +118,7 @@ void USARTx_IRQHandler(void) {
 		/* check if the received character is not the LF character (used to determine end of string)
 		 * or the if the maximum string length has been been reached
 		 */
-		if ( !((t == '\n')||(t == '\r')) && (cnt < MAX_STRLEN) ){
-			receivedString[cnt] = t;
-			cnt++;
-		}
-		else{ // otherwise reset the character counter and print the received string
-			receivedString[cnt] = 0x0;
-			cnt = 0;
-			haveString = 1;
-		}
+		USARTCount++;
+
 	}
 }
