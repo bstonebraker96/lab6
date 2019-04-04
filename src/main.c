@@ -13,32 +13,41 @@
 #include "stm32l4xx_hal.h"
 #include "stm32l475e_iot01.h"
 #include "string.h"
+#include "CircularBuffer.h"
+
+commBuffer_t commBuffer;
+char receivedStr[MAXCOMMBUFFER+1];
 
 static uint32_t USARTCount = 0;
-
 
 int main(void)
 {
 	HAL_Init();
+	initBuffer(&commBuffer,CIRCULAR_RX);
 	/* Configure the System clock to have a frequency of 80 MHz */
 	SystemClock_Config();
 	/* Configure UART4 */
 	Configure_USART();
+
 	char* startText= "\n{\"Action\":\"Debug\",\"Info\":\"Testing UART4\"}\n";
 	uint32_t currentTicks = HAL_GetTick();
 	uint32_t LEDTimer = currentTicks;
 	uint8_t strcount = 0;
+	BSP_LED_Init(LED2);
 	/* Infinite loop */
 	while(1){
-		BSP_LED_Init(LED2);
+
 		BSP_LED_Off(LED2);
 		currentTicks = HAL_GetTick();
+		uint8_t haveString = haveMessage(&commBuffer);
 
-		if (haveString){
+		if (commBuffer.MessageCount){
 			haveString = 0;
-			strcount = 2*strlen(receivedString)+1;
+			getMessage(&commBuffer,receivedStr);
+			strcount = 2*strlen(receivedStr);
 
 		}
+
 		while(strcount > 0){
 			currentTicks = HAL_GetTick();
 			if(currentTicks - LEDTimer >= 500){
@@ -47,6 +56,7 @@ int main(void)
 				LEDTimer = currentTicks;
 			}
 		}
+
 
 
 	}
@@ -112,13 +122,15 @@ RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
  */
 void USARTx_IRQHandler(void) {
 	// check if the USART6 receive interrupt flag was set
+	USARTCount++;
 	if(LL_USART_IsActiveFlag_RXNE(USARTx_INSTANCE)){
 		static uint8_t cnt = 0;
 		char t = LL_USART_ReceiveData8(USARTx_INSTANCE);
 		/* check if the received character is not the LF character (used to determine end of string)
 		 * or the if the maximum string length has been been reached
 		 */
-		USARTCount++;
+		putChar(&commBuffer, t);
+
 
 	}
 }

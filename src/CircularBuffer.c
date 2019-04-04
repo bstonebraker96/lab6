@@ -8,12 +8,13 @@ void initBuffer(commBuffer_t* comm, uint8_t type) {
 	comm->head = 0;
 	comm->tail = 0;
 	comm->bufferSize = 0;
-	memset(comm->buffer, 0, MAXCOMMBUFFER+1);
+	memset(comm->buffer, '~', MAXCOMMBUFFER+1);
 
 }
 //Test if a complete message is in buffer delimiter is \n
 uint8_t haveMessage(commBuffer_t* comm){
-	if(comm->buffer[comm->head] == '\n'){
+	if(comm->MessageCount){
+		//comm->MessageCount--;
 		return 1;
 	}
 	else {
@@ -25,6 +26,9 @@ uint8_t haveMessage(commBuffer_t* comm){
 void putChar(commBuffer_t* comm, char ch){
 	comm->buffer[comm->head] = ch;
 	comm->head++;
+	if(ch == '\n'){
+		comm->MessageCount++;
+	}
 	if(comm->head > MAXCOMMBUFFER){
 		comm->head = 0;
 	}
@@ -41,7 +45,7 @@ char getChar(commBuffer_t* comm){
 }
 //put C string into buffer
 void putMessage(commBuffer_t* comm, char* str, uint8_t length){
-	for(int i=0;i<=length;i++){
+	for(int i=0;i<length;i++){
 		putChar(comm,str[i]);
 	}
 
@@ -49,11 +53,14 @@ void putMessage(commBuffer_t* comm, char* str, uint8_t length){
 //get C string from buffer
 void getMessage(commBuffer_t* comm, char* str){
 	uint32_t i = 0;
+	str[i] = getChar(comm);
 	while(str[i] != '\n'){
-		str[i] = getChar(comm);
 		i++;
+		str[i] = getChar(comm);
 	}
+	str[i] = '\n';
 	str[i+1] = '\0';
+	comm->MessageCount--;
 }
 //get Size of Buffer
 int getBufferSize(commBuffer_t* comm){

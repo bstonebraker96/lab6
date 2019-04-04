@@ -82,7 +82,9 @@ src/main.o: ../src/main.c C:/Users/bston/ECE631/Lab6/inc/main.h \
  C:/Users/bston/ECE631/Lab6/HAL_Driver/Inc/stm32l4xx_ll_exti.h \
  C:/Users/bston/ECE631/Lab6/HAL_Driver/Inc/stm32l4xx_ll_usart.h \
  C:/Users/bston/ECE631/Lab6/HAL_Driver/Inc/stm32l4xx_ll_pwr.h \
- C:/Users/bston/ECE631/Lab6/Utilities/B-L475E-IOT01/stm32l475e_iot01.h
+ C:/Users/bston/ECE631/Lab6/Utilities/B-L475E-IOT01/stm32l475e_iot01.h \
+ C:/Users/bston/ECE631/Lab6/inc/CircularBuffer.h \
+ C:/Users/bston/ECE631/Lab6/CMSIS/device/stm32L4xx.h
 
 C:/Users/bston/ECE631/Lab6/inc/main.h:
 
@@ -253,3 +255,7 @@ C:/Users/bston/ECE631/Lab6/HAL_Driver/Inc/stm32l4xx_ll_usart.h:
 C:/Users/bston/ECE631/Lab6/HAL_Driver/Inc/stm32l4xx_ll_pwr.h:
 
 C:/Users/bston/ECE631/Lab6/Utilities/B-L475E-IOT01/stm32l475e_iot01.h:
+
+C:/Users/bston/ECE631/Lab6/inc/CircularBuffer.h:
+
+C:/Users/bston/ECE631/Lab6/CMSIS/device/stm32L4xx.h:
