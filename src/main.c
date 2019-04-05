@@ -16,6 +16,7 @@
 #include "CircularBuffer.h"
 
 commBuffer_t commBuffer;
+commBuffer_t txBuffer;
 char receivedStr[MAXCOMMBUFFER+1];
 
 static uint32_t USARTCount = 0;
@@ -24,10 +25,12 @@ int main(void)
 {
 	HAL_Init();
 	initBuffer(&commBuffer,CIRCULAR_RX);
+	initBuffer(&txBuffer, CIRCULAR_TX);
 	/* Configure the System clock to have a frequency of 80 MHz */
 	SystemClock_Config();
 	/* Configure UART4 */
 	Configure_USART();
+	LL_USART_DisableIT_TXE(USARTx_INSTANCE);
 
 	char* startText= "\n{\"Action\":\"Debug\",\"Info\":\"Testing UART4\"}\n";
 	uint32_t currentTicks = HAL_GetTick();
@@ -44,10 +47,13 @@ int main(void)
 		if (commBuffer.MessageCount){
 			haveString = 0;
 			getMessage(&commBuffer,receivedStr);
+			//TODO:Let 1 message send 2 if you want. Have a tx message count.
+			putMessage(&txBuffer,receivedStr,strlen(receivedStr));
+			LL_USART_EnableIT_TXE(USARTx_INSTANCE);
 			strcount = 2*strlen(receivedStr);
 
 		}
-
+		//SendCharArrayUSART4(receivedString,strlen(receivedString));
 		while(strcount > 0){
 			currentTicks = HAL_GetTick();
 			if(currentTicks - LEDTimer >= 500){
@@ -130,6 +136,17 @@ void USARTx_IRQHandler(void) {
 		 * or the if the maximum string length has been been reached
 		 */
 		putChar(&commBuffer, t);
+	}
+	else if(LL_USART_IsActiveFlag_TXE(USARTx_INSTANCE)){
+		char t = getChar(&txBuffer);
+		LL_USART_TransmitData8(USARTx_INSTANCE, t);
+		if(t == '\n'){
+			LL_USART_DisableIT_TXE(USARTx_INSTANCE);
+		}
+
+
+
+
 
 
 	}
